@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleProp,
   StyleSheet,
@@ -9,6 +8,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, radius, shadows, spacing, typography } from './tokens';
 
