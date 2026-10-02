@@ -1,7 +1,6 @@
-import React from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
-import { Card, Trip } from './components';
+import { Button, Card, Screen, ScreenFrame, Trip } from './components';
 import { colors } from './tokens';
 import { styles } from './screen-styles';
 
@@ -18,3 +17,7 @@ export function SearchSummary({ onPress }: { onPress: () => void }) {
 }
 
 export function Detail({ label, value }: { label: string; value: string }) { return <View style={styles.detail}><Text style={styles.meta}>{label}</Text><Text style={styles.detailValue}>{value}</Text></View>; }
+
+export function Success({ go, published = false }: { go: (screen: Screen) => void; published?: boolean }) {
+  return <ScreenFrame go={go} title={published ? 'C’est publié' : 'Réservation confirmée'}><View style={styles.successPage}><View style={styles.successMark}><Text style={styles.successGlyph}>✓</Text></View><Text style={styles.successTitle}>{published ? 'Votre trajet est en ligne' : 'C’est confirmé !'}</Text><Text style={styles.displayBody}>{published ? 'Vous serez notifié dès qu’une demande compatible est proposée.' : 'Votre réservation Montréal → Abidjan est enregistrée sous la référence CNCT-7821.'}</Text><Button title={published ? 'Voir mes annonces' : 'Voir mon envoi'} onPress={() => go(published ? 'profile' : 'tracking')} />{!published && <Button title="Retour à l’accueil" variant="outline" onPress={() => go('home')} />}</View></ScreenFrame>;
+}

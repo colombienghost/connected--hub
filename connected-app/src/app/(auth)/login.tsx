@@ -1,27 +1,11 @@
-import React, { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import {
-  AppHeader,
-  BottomNavigation,
-  Button,
-  Card,
-  LogoMark,
-  RouteSummary,
-  Screen,
-  ScreenFrame,
-  Trip,
-  TripCard,
-  VerifiedBadge,
-} from '@/design-system/components';
-import { Detail, Field, SearchSummary, SectionTitle } from '@/design-system/screen-components';
+import { Button, LogoMark, Screen } from '@/design-system/components';
+import { Field } from '@/design-system/screen-components';
 import { useScreenNavigation } from '@/design-system/screen-navigation';
 import { styles } from '@/design-system/screen-styles';
-import { colors, radius, shadows, spacing, typography } from '@/design-system/tokens';
-import { useMessagesStore } from '@/stores/messages';
-import { useShipmentsStore } from '@/stores/shipments';
-import { useTripsStore } from '@/stores/trips';
 import { useUserStore } from '@/stores/user';
 
 function Login({ go }: { go: (screen: Screen) => void }) {
