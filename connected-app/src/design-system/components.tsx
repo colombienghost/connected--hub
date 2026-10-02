@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Icon, IconName } from './icons';
 import { colors, radius, shadows, spacing, typography } from './tokens';
 
 export type Screen =
@@ -64,12 +65,14 @@ export function Button({
   variant = 'primary',
   disabled = false,
   compact = false,
+  trailingIcon,
 }: {
   title: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'outline';
   disabled?: boolean;
   compact?: boolean;
+  trailingIcon?: IconName;
 }) {
   return (
     <Pressable
@@ -85,14 +88,17 @@ export function Button({
         pressed && !disabled && styles.buttonPressed,
         disabled && styles.disabled,
       ]}>
-      <Text
-        style={[
-          styles.buttonText,
-          variant === 'secondary' && styles.buttonTextInverse,
-          variant === 'outline' && styles.buttonTextOutline,
-        ]}>
-        {title}
-      </Text>
+      <View style={styles.buttonContent}>
+        <Text
+          style={[
+            styles.buttonText,
+            variant === 'secondary' && styles.buttonTextInverse,
+            variant === 'outline' && styles.buttonTextOutline,
+          ]}>
+          {title}
+        </Text>
+        {trailingIcon && <Icon color={variant === 'secondary' ? colors.white : colors.navy} name={trailingIcon} size={18} />}
+      </View>
     </Pressable>
   );
 }
@@ -126,7 +132,7 @@ export function Card({
 export function VerifiedBadge({ label = 'Vérifiée' }: { label?: string }) {
   return (
     <View style={styles.badge}>
-      <Text style={styles.badgeIcon}>✓</Text>
+      <Icon color={colors.info} name="check" size={12} strokeWidth={2.5} />
       <Text style={styles.badgeText}>{label}</Text>
     </View>
   );
@@ -141,7 +147,7 @@ export function RouteSummary({ compact = false }: { compact?: boolean }) {
       </View>
       <View style={styles.routeTrack}>
         <View style={styles.routeDash} />
-        <Text style={styles.routePlane}>✈</Text>
+        <Icon color={colors.navy} name="plane" size={18} />
         <View style={styles.routeDash} />
       </View>
       <View style={styles.routeEnd}>
@@ -171,25 +177,31 @@ export function TripCard({ trip, onPress, recommended = false }: { trip: Trip; o
           </View>
           <RouteSummary compact />
           <View style={styles.tripMetaRow}>
-            <Text style={styles.tripMeta}>▣ {trip.date}</Text>
-            <Text style={styles.tripMeta}>▱ {trip.kg}</Text>
+            <View style={styles.tripMetaItem}>
+              <Icon color={colors.textMuted} name="calendar" size={14} />
+              <Text style={styles.tripMeta}>{trip.date}</Text>
+            </View>
+            <View style={styles.tripMetaItem}>
+              <Icon color={colors.textMuted} name="weight" size={14} />
+              <Text style={styles.tripMeta}>{trip.kg}</Text>
+            </View>
           </View>
         </View>
         <View style={styles.tripPriceBox}>
           <Text style={styles.tripPrice}>{trip.price}</Text>
-          <Text style={styles.chevron}>›</Text>
+          <Icon color={colors.navy} name="chevron-right" size={22} />
         </View>
       </View>
     </Card>
   );
 }
 
-const navItems: { icon: string; label: string; id: Screen; tab?: Tab }[] = [
-  { icon: '⌂', label: 'Accueil', id: 'home', tab: 'home' },
-  { icon: '◇', label: 'Trajets', id: 'trips', tab: 'trips' },
-  { icon: '+', label: 'Publier', id: 'publish' },
-  { icon: '◌', label: 'Messages', id: 'messages', tab: 'messages' },
-  { icon: '♙', label: 'Profil', id: 'profile', tab: 'profile' },
+const navItems: { icon: IconName; label: string; id: Screen; tab?: Tab }[] = [
+  { icon: 'home', label: 'Accueil', id: 'home', tab: 'home' },
+  { icon: 'route', label: 'Trajets', id: 'trips', tab: 'trips' },
+  { icon: 'plus', label: 'Publier', id: 'publish' },
+  { icon: 'chat', label: 'Messages', id: 'messages', tab: 'messages' },
+  { icon: 'user', label: 'Profil', id: 'profile', tab: 'profile' },
 ];
 
 export function BottomNavigation({ active, go }: { active?: Tab; go: (screen: Screen) => void }) {
@@ -207,7 +219,7 @@ export function BottomNavigation({ active, go }: { active?: Tab; go: (screen: Sc
               key={item.id}
               onPress={() => go(item.id)}
               style={({ pressed }) => [styles.navItem, central && styles.publishButton, pressed && styles.navPressed]}>
-              <Text style={[styles.navIcon, central && styles.publishIcon, selected && styles.navActive]}>{item.icon}</Text>
+              <Icon color={central ? colors.navy : selected ? colors.amber : colors.white} name={item.icon} size={central ? 34 : 26} />
               {!central && <Text style={[styles.navLabel, selected && styles.navActive]}>{item.label}</Text>}
             </Pressable>
           );
@@ -231,7 +243,7 @@ export function AppHeader({
       <View style={styles.headerTop}>
         {back ? (
           <Pressable accessibilityLabel="Retour" accessibilityRole="button" onPress={back} style={styles.headerAction}>
-            <Text style={styles.back}>‹</Text>
+            <Icon color={colors.white} name="chevron-left" size={28} />
           </Pressable>
         ) : (
           <LogoMark inverse size={38} />
@@ -239,7 +251,7 @@ export function AppHeader({
         {mode && (
           <View style={styles.modeChip}>
             <Text style={styles.modeText}>Mode expéditeur</Text>
-            <Text style={styles.modeSwitch}>⇄</Text>
+            <Icon color={colors.white} name="sliders" size={18} />
           </View>
         )}
         {!mode && <LogoMark inverse size={30} />}
@@ -295,12 +307,12 @@ const styles = StyleSheet.create({
   buttonPressed: { opacity: 0.88, transform: [{ translateY: 1 }] },
   disabled: { opacity: 0.45 },
   buttonText: { color: colors.navy, fontSize: 16, fontWeight: '700', fontFamily: typography.ui },
+  buttonContent: { alignItems: 'center', flexDirection: 'row', gap: spacing[2] },
   buttonTextInverse: { color: colors.white },
   buttonTextOutline: { color: colors.navy },
   card: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.borderSoft, borderRadius: radius.md, padding: spacing[4], marginBottom: spacing[3] },
   cardPressed: { opacity: 0.9, transform: [{ scale: 0.995 }] },
   badge: { alignItems: 'center', backgroundColor: colors.sky, borderRadius: radius.xs, flexDirection: 'row', gap: 4, paddingHorizontal: 7, paddingVertical: 4 },
-  badgeIcon: { color: colors.info, fontSize: 10, fontWeight: '900' },
   badgeText: { color: colors.info, fontSize: 11, fontWeight: '700' },
   route: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', marginVertical: spacing[3] },
   routeCompact: { marginVertical: spacing[2] },
@@ -308,7 +320,6 @@ const styles = StyleSheet.create({
   routeCode: { color: colors.textTertiary, fontSize: 11, marginTop: 2 },
   routeTrack: { alignItems: 'center', flexDirection: 'row', flex: 1, justifyContent: 'center', marginHorizontal: spacing[2] },
   routeDash: { borderTopWidth: 1, borderColor: colors.textTertiary, flex: 1, maxWidth: 30 },
-  routePlane: { color: colors.navy, fontSize: 18, marginHorizontal: 5 },
   routeEnd: { alignItems: 'flex-end' },
   tripCard: { padding: spacing[4] },
   recommendedCard: { borderColor: colors.amber, borderWidth: 1.5 },
@@ -321,27 +332,23 @@ const styles = StyleSheet.create({
   inline: { alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   tripName: { color: colors.navy, fontSize: 17, fontWeight: '800' },
   tripMetaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] },
+  tripMetaItem: { alignItems: 'center', flexDirection: 'row', gap: 4 },
   tripMeta: { color: colors.textMuted, fontSize: 12 },
   tripPriceBox: { alignItems: 'flex-end', alignSelf: 'stretch', justifyContent: 'space-between' },
   tripPrice: { color: colors.amberPressed, fontSize: 21, fontWeight: '800' },
-  chevron: { color: colors.navy, fontSize: 30, lineHeight: 30 },
   navShell: { backgroundColor: colors.navy, height: 84, position: 'relative' },
   notchHalo: { alignSelf: 'center', backgroundColor: colors.warmWhite, borderRadius: 38, height: 76, position: 'absolute', top: -22, width: 76, zIndex: 1 },
   navBar: { alignItems: 'center', backgroundColor: 'transparent', flexDirection: 'row', height: 84, justifyContent: 'space-around', paddingBottom: 8, paddingHorizontal: 8, position: 'relative', zIndex: 2 },
   navItem: { alignItems: 'center', justifyContent: 'center', minHeight: 52, width: 62, zIndex: 2 },
   navPressed: { opacity: 0.72 },
   publishButton: { backgroundColor: colors.amber, borderColor: colors.white, borderRadius: 32, borderWidth: 3, elevation: 10, height: 64, marginTop: -31, width: 64, zIndex: 3, ...shadows.floating },
-  navIcon: { color: colors.white, fontSize: 25, lineHeight: 27 },
-  publishIcon: { color: colors.navy, fontSize: 34, fontWeight: '400' },
   navLabel: { color: colors.white, fontSize: 10, fontWeight: '600', marginTop: 3 },
   navActive: { color: colors.amber },
   header: { backgroundColor: colors.navy, paddingBottom: spacing[6], paddingHorizontal: spacing[5], paddingTop: spacing[3] },
   headerTop: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', minHeight: 52 },
   headerAction: { alignItems: 'center', height: 48, justifyContent: 'center', width: 48 },
-  back: { color: colors.white, fontSize: 44, fontWeight: '300', lineHeight: 44 },
   modeChip: { alignItems: 'center', borderColor: 'rgba(255,255,255,0.34)', borderRadius: radius.sm, borderWidth: 1, flexDirection: 'row', gap: spacing[2], marginLeft: 'auto', marginRight: spacing[3], minHeight: 44, paddingHorizontal: spacing[3] },
   modeText: { color: colors.white, fontSize: 13, fontWeight: '500' },
-  modeSwitch: { color: colors.white, fontSize: 20 },
   profileMini: { alignItems: 'center', backgroundColor: colors.sky, borderColor: colors.white, borderRadius: 21, borderWidth: 2, height: 42, justifyContent: 'center', width: 42 },
   profileMiniText: { color: colors.navy, fontSize: 12, fontWeight: '800' },
   headerTitle: { color: colors.white, fontSize: 31, fontWeight: '800', marginTop: spacing[5] },
