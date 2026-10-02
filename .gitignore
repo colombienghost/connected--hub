@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Expo / React Native generated files
+.expo/
+**/.expo/
+dist/
+web-build/
+expo-env.d.ts
+*.tsbuildinfo
+.metro-health-check*
+
+# Native generated folders
+ios/
+android/
+**/ios/
+**/android/
+.kotlin/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Secrets / certificates
+*.pem
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+pnpm-debug.*
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+
+# Local backups
+connected-app/_git_connected_app_backup/
