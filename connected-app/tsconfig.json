@@ -12,14 +12,8 @@
     }
   },
   "include": [
-    "src/app/**/*.ts",
-    "src/app/**/*.tsx",
+    "src/**/*",
     "expo-env.d.ts",
     ".expo/types/**/*.ts"
-  ],
-  "exclude": [
-    "src/components/**",
-    "src/constants/**",
-    "src/hooks/**"
   ]
 }
