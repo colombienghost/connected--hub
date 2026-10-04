@@ -98,16 +98,26 @@ export const useMessagesStore = create<MessagesState>((set) => ({
     const conversationId = useMessagesStore.getState().activeConversationId;
     if (!message.trim() || !db || !user || !recipientId) return;
     const conversation = db.collection("messages").doc(conversationId);
-    await conversation.set(
-      {
+    const existing = await db
+      .collection("messages")
+      .where("participantIds", "array-contains", user.uid)
+      .where("__name__", "==", conversationId)
+      .limit(1)
+      .get();
+    if (!existing.empty) {
+      await conversation.update({
+        lastMessage: message.trim(),
+        updatedAt: serverTimestamp(),
+      });
+    } else {
+      await conversation.set({
         participantIds: [user.uid, recipientId],
         recipientName: "Voyageur CONNECTED",
         lastMessage: message.trim(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
+      });
+    }
     await conversation.collection("items").add({
       senderId: user.uid,
       body: message.trim(),
