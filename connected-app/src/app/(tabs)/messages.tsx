@@ -22,8 +22,15 @@ function Messages({ go }: { go: (screen: Screen) => void }) {
           Rechercher une conversation
         </Text>
       </View>
-      {conversations.map(([name, message, time, unread]) => (
-        <Card key={name} onPress={() => go("chat")} style={styles.conversation}>
+      {conversations.map(([name, message, time, unread], index) => (
+        <Card
+          key={name}
+          onPress={() => {
+            store.selectConversation(store.conversations[index].id);
+            go("chat");
+          }}
+          style={styles.conversation}
+        >
           <View style={styles.conversationAvatar}>
             <Text style={styles.avatarText}>
               {name

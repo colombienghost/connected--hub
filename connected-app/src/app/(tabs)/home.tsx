@@ -13,6 +13,7 @@ import { useTripsStore } from "@/stores/trips";
 
 function Home({ go }: { go: (screen: Screen) => void }) {
   const trips = useTripsStore((state) => state.trips);
+  const selectTrip = useTripsStore((state) => state.selectTrip);
 
   return (
     <SafeAreaView style={styles.darkSafe}>
@@ -47,7 +48,14 @@ function Home({ go }: { go: (screen: Screen) => void }) {
             title="Trajets disponibles"
           />
           {trips.map((trip) => (
-            <TripCard key={trip.name} onPress={() => go("trip")} trip={trip} />
+            <TripCard
+              key={trip.id}
+              onPress={() => {
+                selectTrip(trip.id);
+                go("trip");
+              }}
+              trip={trip}
+            />
           ))}
         </ScrollView>
       </View>

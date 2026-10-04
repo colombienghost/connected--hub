@@ -28,3 +28,9 @@ src/
 assets/           Icones, images et ressources de l'application
 global.css        Styles web globaux
 ```
+
+## Firebase
+
+Le projet Firebase CONNECTED utilise Firestore Standard dans `northamerica-northeast1` (Montréal) et l'authentification par téléphone. Les règles prototype se trouvent dans `firestore.rules` et ne sont pas déployées automatiquement.
+
+L'OTP nécessite un dev build natif : `npx expo run:android` pour Android. Expo Go reste disponible pour le visuel et les données de démonstration, mais ne charge pas les modules Firebase natifs. `google-services.json` est une configuration locale Android, volontairement exclue de Git. Storage est différé : Firebase exige actuellement le plan Blaze, alors que le projet reste sur Spark.

@@ -1,4 +1,5 @@
 import { View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 
 import { Text } from "@/design-system/text";
 
@@ -13,8 +14,12 @@ import { Icon, IconName } from "@/design-system/icons";
 import { useScreenNavigation } from "@/design-system/screen-navigation";
 import { styles } from "@/design-system/screen-styles";
 import { colors } from "@/design-system/tokens";
+import { useShipmentsStore } from "@/stores/shipments";
 
 function Tracking({ go }: { go: (screen: Screen) => void }) {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const shipments = useShipmentsStore((state) => state.shipments);
+  const shipment = shipments.find((item) => item.id === id) ?? shipments[0];
   const events = [
     ["Réservé", "18 juin\n08:30"],
     ["Remis", "20 juin\n12:45"],
@@ -38,12 +43,12 @@ function Tracking({ go }: { go: (screen: Screen) => void }) {
       <Card style={styles.trackingHero}>
         <View style={styles.trackingTop}>
           <View>
-            <Text style={styles.pageTitle}>Montréal → Abidjan</Text>
-            <Text style={styles.trackingRef}>CNCT-7821</Text>
+            <Text style={styles.pageTitle}>{shipment.route}</Text>
+            <Text style={styles.trackingRef}>{shipment.id}</Text>
           </View>
           <View>
             <View style={styles.statusPill}>
-              <Text style={styles.statusText}>En route</Text>
+              <Text style={styles.statusText}>{shipment.status}</Text>
             </View>
             <Text style={styles.arrival}>Arrivée{"\n"}21 juin</Text>
           </View>

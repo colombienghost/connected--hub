@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 import { Text } from "@/design-system/text";
@@ -13,6 +13,12 @@ import { useUserStore } from "@/stores/user";
 
 function Login({ go }: { go: (screen: Screen) => void }) {
   const [method, setMethod] = useState<"choice" | "email" | "phone">("choice");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [code, setCode] = useState("");
+  const phoneConfirmation = useUserStore((state) => state.phoneConfirmation);
+  const authError = useUserStore((state) => state.authError);
+  const sendPhoneCode = useUserStore((state) => state.sendPhoneCode);
+  const confirmPhoneCode = useUserStore((state) => state.confirmPhoneCode);
   return (
     <SafeAreaView style={styles.authSafe}>
       <ScrollView
@@ -77,16 +83,48 @@ function Login({ go }: { go: (screen: Screen) => void }) {
                   Toutes les méthodes
                 </Text>
               </Pressable>
-              <Field
-                label={
-                  method === "email" ? "Adresse e-mail" : "Numéro de téléphone"
-                }
-                placeholder={
-                  method === "email" ? "franck@email.com" : "+1 514 000 0000"
-                }
-              />
-              <Field label="Mot de passe" placeholder="••••••••" secure />
-              <Button title="Se connecter" onPress={() => go("home")} />
+              {method === "phone" ? (
+                <>
+                  <Field
+                    label="Numéro de téléphone"
+                    onChangeText={setPhoneNumber}
+                    placeholder="+1 514 000 0000"
+                    value={phoneNumber}
+                  />
+                  {phoneConfirmation && (
+                    <Field
+                      label="Code reçu"
+                      onChangeText={setCode}
+                      placeholder="123456"
+                      value={code}
+                    />
+                  )}
+                  {authError && (
+                    <Text style={styles.legalNote}>{authError}</Text>
+                  )}
+                  <Button
+                    title={
+                      phoneConfirmation
+                        ? "Confirmer le code"
+                        : "Recevoir un code"
+                    }
+                    onPress={() =>
+                      void (phoneConfirmation
+                        ? confirmPhoneCode(code)
+                        : sendPhoneCode(phoneNumber))
+                    }
+                  />
+                </>
+              ) : (
+                <>
+                  <Field
+                    label="Adresse e-mail"
+                    placeholder="franck@email.com"
+                  />
+                  <Field label="Mot de passe" placeholder="••••••••" secure />
+                  <Button title="Se connecter" onPress={() => go("home")} />
+                </>
+              )}
             </>
           )}
           <Pressable onPress={() => go("home")}>
@@ -99,12 +137,15 @@ function Login({ go }: { go: (screen: Screen) => void }) {
 }
 
 export default function LoginRoute() {
-  const signIn = useUserStore((state) => state.signIn);
+  const session = useUserStore((state) => state.session);
   const navigate = useScreenNavigation();
   const go = (screen: Screen) => {
-    if (screen === "home") signIn();
     navigate(screen);
   };
+
+  useEffect(() => {
+    if (session) navigate("home");
+  }, [navigate, session]);
 
   return <Login go={go} />;
 }

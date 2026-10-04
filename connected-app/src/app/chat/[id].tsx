@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 
 import { Text, TextInput } from "@/design-system/text";
 
@@ -8,16 +9,27 @@ import { Icon, IconName } from "@/design-system/icons";
 import { useScreenNavigation } from "@/design-system/screen-navigation";
 import { styles } from "@/design-system/screen-styles";
 import { colors } from "@/design-system/tokens";
+import { useMessagesStore } from "@/stores/messages";
 
 function Chat({ go }: { go: (screen: Screen) => void }) {
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState([
-    "Bonjour Franck, votre colis est bien pris en charge.",
-    "Parfait, on se retrouve au terminal 1.",
-  ]);
+  const messages = useMessagesStore((state) => state.messages);
+  const conversations = useMessagesStore((state) => state.conversations);
+  const selectConversation = useMessagesStore(
+    (state) => state.selectConversation,
+  );
+  const listenToMessages = useMessagesStore((state) => state.listenToMessages);
+  const sendMessage = useMessagesStore((state) => state.sendMessage);
+  const conversation =
+    conversations.find((item) => item.id === id) ?? conversations[0];
+  useEffect(() => {
+    selectConversation(conversation.id);
+    return listenToMessages(conversation.id);
+  }, [conversation.id, listenToMessages, selectConversation]);
   const timelineIcons: IconName[] = ["check", "check", "plane", "clock"];
   return (
-    <ScreenFrame active="messages" go={go} showNav title="Sarah M.">
+    <ScreenFrame active="messages" go={go} showNav title={conversation.name}>
       <Card style={styles.contextCard}>
         <View style={styles.contextTop}>
           <View>
@@ -80,7 +92,7 @@ function Chat({ go }: { go: (screen: Screen) => void }) {
           accessibilityLabel="Envoyer"
           onPress={() => {
             if (draft.trim()) {
-              setMessages([...messages, draft.trim()]);
+              void sendMessage(draft.trim(), conversation.id);
               setDraft("");
             }
           }}

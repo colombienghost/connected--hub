@@ -6,8 +6,13 @@ import { Button, Card, Screen, ScreenFrame } from "@/design-system/components";
 import { Icon } from "@/design-system/icons";
 import { useScreenNavigation } from "@/design-system/screen-navigation";
 import { styles } from "@/design-system/screen-styles";
+import { useShipmentsStore } from "@/stores/shipments";
+import { useTripsStore } from "@/stores/trips";
 
 function Payment({ go }: { go: (screen: Screen) => void }) {
+  const createShipment = useShipmentsStore((state) => state.createShipment);
+  const selectShipment = useShipmentsStore((state) => state.setActiveShipment);
+  const tripId = useTripsStore((state) => state.selectedTripId);
   return (
     <ScreenFrame go={go} title="Paiement sécurisé">
       <Card style={styles.trustPanel}>
@@ -34,7 +39,15 @@ function Payment({ go }: { go: (screen: Screen) => void }) {
         <Text style={[styles.cardTitle, styles.flex]}>Carte •••• 4242</Text>
         <Text style={styles.link}>Modifier</Text>
       </Card>
-      <Button title="Payer 85 $ CAD" onPress={() => go("done")} />
+      <Button
+        title="Payer 85 $ CAD"
+        onPress={() =>
+          void createShipment(tripId).then((id) => {
+            selectShipment(id);
+            go("done");
+          })
+        }
+      />
       <Text style={styles.legalNote}>Simulation locale — aucun débit réel</Text>
     </ScreenFrame>
   );

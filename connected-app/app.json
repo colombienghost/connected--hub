@@ -11,6 +11,8 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.colombienghost.connectedapp",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -36,8 +38,21 @@
       "expo-font",
       "expo-image",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "expo-notifications"
     ],
+    "extra": {
+      "firebase": {
+        "apiKey": "AIzaSyCDZ673JvrUuqISQN_bY5e5MJEeE4u7_YY",
+        "appId": "1:678091190264:web:3a765b3aae97d0762ff00d",
+        "authDomain": "connected-hub-f2121.firebaseapp.com",
+        "messagingSenderId": "678091190264",
+        "projectId": "connected-hub-f2121",
+        "storageBucket": "connected-hub-f2121.firebasestorage.app"
+      }
+    },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

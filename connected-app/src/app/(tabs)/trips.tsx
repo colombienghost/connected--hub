@@ -13,6 +13,7 @@ import { useTripsStore } from "@/stores/trips";
 
 function Trips({ go }: { go: (screen: Screen) => void }) {
   const trips = useTripsStore((state) => state.trips);
+  const selectTrip = useTripsStore((state) => state.selectTrip);
   const filters: { icon?: IconName; label: string }[] = [
     { label: "Tous" },
     { icon: "check", label: "Vérifiés" },
@@ -57,8 +58,11 @@ function Trips({ go }: { go: (screen: Screen) => void }) {
           <SectionTitle title="Trajets disponibles" />
           {trips.map((trip, index) => (
             <TripCard
-              key={trip.name}
-              onPress={() => go("trip")}
+              key={trip.id}
+              onPress={() => {
+                selectTrip(trip.id);
+                go("trip");
+              }}
               recommended={index === 0}
               trip={trip}
             />

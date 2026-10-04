@@ -1,0 +1,44 @@
+rules_version = '2';
+
+// Prototype rules for CONNECTED. Data model: private users/{uid}; published
+// trips with immutable authorId; parcels and bookings owned by their sender;
+// messages/{conversationId}/items for the two immutable participants.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function own(uid) { return signedIn() && request.auth.uid == uid; }
+    function hasOnly(keys) { return request.resource.data.keys().hasOnly(keys); }
+    function stringField(name, max) { return request.resource.data[name] is string && request.resource.data[name].size() <= max; }
+    function immutable(fields) { return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields); }
+
+    function validUser() {
+      return hasOnly(['displayName', 'photoURL', 'verified', 'pushToken', 'createdAt', 'updatedAt']) &&
+        stringField('displayName', 80) && request.resource.data.verified is bool &&
+        request.resource.data.createdAt is timestamp && request.resource.data.updatedAt is timestamp;
+    }
+    function validTrip() {
+      return hasOnly(['authorId', 'authorName', 'from', 'to', 'departureDate', 'capacityKg', 'priceCents', 'rating', 'status', 'createdAt', 'updatedAt']) &&
+        stringField('authorId', 128) && stringField('authorName', 80) && stringField('from', 100) && stringField('to', 100) && stringField('departureDate', 80) &&
+        request.resource.data.capacityKg is number && request.resource.data.capacityKg > 0 && request.resource.data.capacityKg <= 100 &&
+        request.resource.data.priceCents is number && request.resource.data.priceCents >= 0 && request.resource.data.priceCents <= 1000000 &&
+        request.resource.data.rating is number && request.resource.data.status == 'published' && request.resource.data.createdAt is timestamp && request.resource.data.updatedAt is timestamp;
+    }
+    function validParcel() {
+      return hasOnly(['senderId', 'tripId', 'bookingId', 'reference', 'from', 'to', 'contentType', 'weightKg', 'dimensions', 'description', 'declaredValueCents', 'status', 'createdAt', 'updatedAt']) &&
+        stringField('senderId', 128) && stringField('tripId', 128) && stringField('bookingId', 128) && stringField('reference', 32) && stringField('from', 100) && stringField('to', 100) && stringField('contentType', 80) && stringField('description', 1000) &&
+        request.resource.data.weightKg is number && request.resource.data.weightKg > 0 && request.resource.data.weightKg <= 100 && request.resource.data.declaredValueCents is number && request.resource.data.declaredValueCents >= 0 && request.resource.data.declaredValueCents <= 100000000 && request.resource.data.status in ['reserved', 'in_transit', 'delivered'] && request.resource.data.createdAt is timestamp && request.resource.data.updatedAt is timestamp;
+    }
+    function validBooking() {
+      return hasOnly(['senderId', 'travelerId', 'parcelId', 'tripId', 'status', 'createdAt', 'updatedAt']) && stringField('senderId', 128) && stringField('travelerId', 128) && stringField('parcelId', 128) && stringField('tripId', 128) && request.resource.data.status == 'reserved' && request.resource.data.createdAt is timestamp && request.resource.data.updatedAt is timestamp;
+    }
+    function participant(id) { return signedIn() && request.auth.uid in get(/databases/$(database)/documents/messages/$(id)).data.participantIds; }
+
+    match /users/{uid} { allow read: if own(uid); allow create: if own(uid) && validUser(); allow update: if own(uid) && validUser() && immutable(['createdAt']); allow delete: if false; }
+    match /trips/{tripId} { allow read: if signedIn(); allow create: if signedIn() && request.resource.data.authorId == request.auth.uid && validTrip(); allow update: if own(resource.data.authorId) && request.resource.data.authorId == resource.data.authorId && immutable(['authorId', 'createdAt']) && validTrip(); allow delete: if own(resource.data.authorId); }
+    match /parcels/{parcelId} { allow read: if own(resource.data.senderId); allow create: if signedIn() && request.resource.data.senderId == request.auth.uid && validParcel(); allow update: if own(resource.data.senderId) && request.resource.data.senderId == resource.data.senderId && immutable(['senderId', 'createdAt']) && validParcel(); allow delete: if false; }
+    match /bookings/{bookingId} { allow read: if signedIn() && (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.travelerId); allow create: if signedIn() && request.resource.data.senderId == request.auth.uid && validBooking(); allow update, delete: if false; }
+    match /messages/{conversationId} { allow read: if signedIn() && request.auth.uid in resource.data.participantIds; allow create: if signedIn() && request.auth.uid in request.resource.data.participantIds && request.resource.data.participantIds.size() == 2 && stringField('recipientName', 80) && stringField('lastMessage', 1000) && request.resource.data.createdAt is timestamp && request.resource.data.updatedAt is timestamp; allow update: if signedIn() && request.auth.uid in resource.data.participantIds && immutable(['participantIds', 'createdAt']) && stringField('recipientName', 80) && stringField('lastMessage', 1000) && request.resource.data.updatedAt is timestamp; allow delete: if false;
+      match /items/{messageId} { allow read: if participant(conversationId); allow create: if participant(conversationId) && request.resource.data.keys().hasOnly(['senderId', 'body', 'createdAt']) && request.resource.data.senderId == request.auth.uid && stringField('body', 1000) && request.resource.data.createdAt is timestamp; allow update, delete: if false; }
+    }
+  }
+}
