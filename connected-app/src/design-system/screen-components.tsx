@@ -2,7 +2,7 @@ import { Pressable, View } from "react-native";
 
 import { Text, TextInput } from "@/design-system/text";
 
-import { Button, Card, Screen, ScreenFrame, Trip } from "./components";
+import { Button, Card, Screen, ScreenFrame } from "./components";
 import { Icon } from "./icons";
 import { colors } from "./tokens";
 import { styles } from "./screen-styles";

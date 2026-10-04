@@ -48,7 +48,11 @@ export const radius = {
 
 export const typography = {
   sans: "Inter",
+  sansMedium: "Inter Medium",
+  sansSemiBold: "Inter SemiBold",
+  sansBold: "Inter Bold",
   display: "Playfair Display",
+  displayBold: "Playfair Display Bold",
   mono: "Inter",
 } as const;
 
